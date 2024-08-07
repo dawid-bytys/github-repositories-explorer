@@ -1,70 +1,127 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import * as Yup from 'yup';
+import Toast from 'react-native-root-toast';
+import { useCallback, useEffect, useState } from 'react';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { Formik } from 'formik';
+import { ThemedInput } from '@/components/ThemedInput/ThemedInput';
+import { useSearchUsersQuery } from '@/network/queries/github';
+import { Button } from '@/components/Button/Button';
+import { ThemedContainer } from '@/components/ThemedContainer/ThemedContainer';
+import { ThemedText } from '@/components/ThemedText/ThemedText';
+import { Accordion } from '@/components/Accordion/Accordion';
+import { Loading } from '@/components/Loading/Loading';
+import { ResultsInfo } from '@/components/ResultsInfo/ResultsInfo';
+import { RepositoriesList } from '@/components/RepositoriesList/RepositoriesList';
+import { useBoundStore } from '@/store/store';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const initialValues = {
+  username: '',
+};
+
+const validationSchema = Yup.object().shape({
+  username: Yup.string().required('Username is required'),
+});
 
 export default function HomeScreen() {
+  const theme = useBoundStore((state) => state.theme);
+  const [query, setQuery] = useState('');
+  const [whichFocused, setWhichFocused] = useState<string | null>(null);
+  const { data, error, isLoading } = useSearchUsersQuery(query);
+
+  const renderResults = useCallback(() => {
+    if (isLoading) {
+      return <Loading />;
+    }
+
+    if (error) {
+      return <ResultsInfo title="An error occurred. 😵" />;
+    }
+
+    if (!error && data && data.items.length === 0) {
+      return <ResultsInfo title="No users found. 😢" />;
+    }
+
+    if (!error && data && data.items.length > 0) {
+      // using map here because there are only 5 items
+      return (
+        <View style={styles.resultsContainer}>
+          <ThemedText>Showing users for "{query}"</ThemedText>
+          {data.items.map((user) => (
+            <Accordion key={user.id} title={user.login}>
+              <RepositoriesList username={user.login} />
+            </Accordion>
+          ))}
+        </View>
+      );
+    }
+
+    return <ResultsInfo title="Are you looking for someone? 🧐" />;
+  }, [data, error, isLoading]);
+
+  useEffect(() => {
+    if (error) {
+      Toast.show(error.message, {
+        position: Toast.positions.TOP,
+      });
+    }
+  }, [error]);
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <ThemedContainer>
+      <ScrollView
+        indicatorStyle={theme === 'dark' ? 'white' : 'black'}
+        contentContainerStyle={styles.scrollContentContainer}
+        keyboardShouldPersistTaps="handled">
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={({ username }) => setQuery(username)}>
+          {({ handleChange, handleSubmit, handleBlur, values, errors }) => (
+            <View style={styles.formContainer}>
+              <ThemedInput
+                editable={!isLoading}
+                focused={whichFocused === 'username'}
+                value={values.username}
+                error={errors.username}
+                placeholder="Enter username"
+                onFocus={() => setWhichFocused('username')}
+                onBlur={() => {
+                  handleBlur('username');
+                  setWhichFocused(null);
+                }}
+                onChangeText={handleChange('username')}
+              />
+              <Button title="Search" onPress={() => handleSubmit()} disabled={isLoading} />
+            </View>
+          )}
+        </Formik>
+        {renderResults()}
+      </ScrollView>
+    </ThemedContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  flex: {
+    flex: 1,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  scrollContentContainer: {
+    flexGrow: 1,
+    padding: 25,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  formContainer: {
+    gap: 10,
+  },
+  infoContainer: {
+    flex: 1,
+    marginTop: 10,
+  },
+  resultsContainer: {
+    flex: 1,
+    marginTop: 10,
+    gap: 10,
+  },
+  listContainer: {
+    gap: 10,
   },
 });
