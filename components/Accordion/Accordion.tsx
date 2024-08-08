@@ -2,14 +2,13 @@ import { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { ThemedText } from '../ThemedText/ThemedText';
 import { styles } from './styles';
-import { Colors } from '@/constants/colors';
-import { useBoundStore } from '@/store/store';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
 import { Chevron } from '../Chevron/Chevron';
 import type { AccordionProps } from './types';
+import { useColors } from '@/hooks/useColors';
 
 export function Accordion({ title, children }: AccordionProps) {
-  const theme = useBoundStore((state) => state.theme);
+  const colors = useColors();
   const [isExpanded, setIsExpanded] = useState(false);
   const progress = useSharedValue(0);
 
@@ -20,7 +19,7 @@ export function Accordion({ title, children }: AccordionProps) {
   return (
     <View
       testID="accordion"
-      style={[styles.container, { backgroundColor: Colors[theme].accordionBackground }]}>
+      style={[styles.container, { backgroundColor: colors.accordionBackground }]}>
       <Pressable
         testID="accordion-button"
         onPress={() => setIsExpanded((prevState) => !prevState)}
@@ -29,11 +28,7 @@ export function Accordion({ title, children }: AccordionProps) {
         <Chevron progress={progress} />
       </Pressable>
       {isExpanded && (
-        <View
-          style={[
-            styles.expandedContainer,
-            { backgroundColor: Colors[theme].accordionBackground },
-          ]}>
+        <View style={[styles.expandedContainer, { backgroundColor: colors.accordionBackground }]}>
           {children}
         </View>
       )}

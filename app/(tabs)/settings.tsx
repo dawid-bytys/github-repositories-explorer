@@ -1,12 +1,14 @@
 import { Switch, View, StyleSheet } from 'react-native';
 import { SettingsItem } from '@/components/SettingsItem/SettingsItem';
 import { ThemedContainer } from '@/components/ThemedContainer/ThemedContainer';
-import { BLUE, Colors, GREY } from '@/constants/colors';
+import { BLUE, GREY } from '@/constants/colors';
 import { useBoundStore } from '@/store/store';
 import { Feather } from '@expo/vector-icons';
+import { useColors } from '@/hooks/useColors';
 
 export default function SettingsScreen() {
   const theme = useBoundStore((state) => state.theme);
+  const colors = useColors();
   const toggleTheme = useBoundStore((state) => state.toggleTheme);
 
   return (
@@ -14,7 +16,7 @@ export default function SettingsScreen() {
       <View style={styles.container}>
         <SettingsItem
           title="Dark mode"
-          leftContent={<Feather name="moon" size={28} color={Colors[theme].settingsIcon} />}
+          leftContent={<Feather name="moon" size={28} color={colors.settingsIcon} />}
           rightContent={
             <Switch
               value={theme === 'dark'}

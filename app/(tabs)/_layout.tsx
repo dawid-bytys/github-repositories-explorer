@@ -1,21 +1,21 @@
 import { Tabs } from 'expo-router';
-import { useBoundStore } from '@/store/store';
 import { Colors } from '@/constants/colors';
 import { Feather } from '@expo/vector-icons';
+import { useColors } from '@/hooks/useColors';
 
 export default function TabLayout() {
-  const theme = useBoundStore((state) => state.theme);
+  const colors = useColors();
 
   return (
     <Tabs
       screenOptions={{
         tabBarShowLabel: false,
         headerShown: false,
-        tabBarActiveTintColor: Colors[theme].tabBarActiveTint,
-        tabBarInactiveTintColor: Colors[theme].tabBarInactiveTint,
+        tabBarActiveTintColor: colors.tabBarActiveTint,
+        tabBarInactiveTintColor: colors.tabBarInactiveTint,
         tabBarStyle: {
           height: 80,
-          backgroundColor: Colors[theme].background,
+          backgroundColor: colors.background,
         },
       }}>
       <Tabs.Screen

@@ -1,11 +1,11 @@
-import { useBoundStore } from '@/store/store';
 import { TextInput, Text, View } from 'react-native';
 import { ThemedInputProps } from './types';
 import { styles } from './styles';
-import { BLUE, Colors, RED } from '@/constants/colors';
+import { BLUE, RED } from '@/constants/colors';
+import { useColors } from '@/hooks/useColors';
 
 export function ThemedInput(props: ThemedInputProps) {
-  const theme = useBoundStore((state) => state.theme);
+  const colors = useColors();
 
   return (
     <View style={styles.container}>
@@ -15,12 +15,12 @@ export function ThemedInput(props: ThemedInputProps) {
           styles.input,
           props.style,
           {
-            color: Colors[theme].text,
-            borderColor: props.error ? RED : props.focused ? BLUE : Colors[theme].border,
-            backgroundColor: Colors[theme].inputBackground,
+            color: colors.text,
+            borderColor: props.error ? RED : props.focused ? BLUE : colors.border,
+            backgroundColor: colors.inputBackground,
           },
         ]}
-        placeholderTextColor={Colors[theme].inputPlaceholder}
+        placeholderTextColor={colors.inputPlaceholder}
       />
       {props.error && <Text style={styles.error}>{props.error}</Text>}
     </View>
