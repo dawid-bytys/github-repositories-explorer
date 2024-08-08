@@ -23,17 +23,16 @@ export function RepositoriesList({ username }: RepositoriesListProps) {
     return data.pages.flatMap((page) => page);
   }, [data]);
 
-  const renderItem = useCallback(
-    ({ item }: ListRenderItemInfo<RepositoriesResponse>) => (
+  const renderItem = useCallback(({ item }: ListRenderItemInfo<RepositoriesResponse>) => {
+    return (
       <RepositoryTile
         title={item.name}
         description={item.description}
         stars={item.stargazers_count}
         url={item.html_url}
       />
-    ),
-    [],
-  );
+    );
+  }, []);
 
   // rendering footer separately (not using ListFooterComponent) because
   // there is some issue with extra space if ListFooterComponent is null/undefined
@@ -81,7 +80,7 @@ export function RepositoriesList({ username }: RepositoriesListProps) {
           data={flattenedData}
           renderItem={renderItem}
           keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={{ gap: 10 }}
+          contentContainerStyle={styles.listContent}
         />
         {renderFooter()}
       </>

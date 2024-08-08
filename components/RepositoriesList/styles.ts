@@ -8,4 +8,7 @@ export const styles = StyleSheet.create({
   footer: {
     marginTop: 10,
   },
+  listContent: {
+    gap: 10,
+  },
 });
