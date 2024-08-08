@@ -38,13 +38,11 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={client}>
       <RootSiblingParent>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <SafeAreaProvider>
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            </Stack>
-          </SafeAreaProvider>
-        </GestureHandlerRootView>
+        <SafeAreaProvider>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          </Stack>
+        </SafeAreaProvider>
       </RootSiblingParent>
     </QueryClientProvider>
   );
