@@ -46,7 +46,7 @@ export default function HomeScreen() {
       return (
         <View style={styles.resultsContainer}>
           <ThemedText>Showing users for "{query}"</ThemedText>
-          {data?.items.map((user) => (
+          {data.items.map((user) => (
             <Accordion key={user.id} title={user.login}>
               <RepositoriesList username={user.login} />
             </Accordion>
