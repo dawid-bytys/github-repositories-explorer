@@ -26,27 +26,27 @@ export default function HomeScreen() {
   const theme = useBoundStore((state) => state.theme);
   const [query, setQuery] = useState('');
   const [whichFocused, setWhichFocused] = useState<string | null>(null);
-  const { data, error, isLoading } = useSearchUsersQuery(query);
+  const { data, error, isError, isFetching } = useSearchUsersQuery(query);
 
   const renderResults = useCallback(() => {
-    if (isLoading) {
+    if (isFetching) {
       return <Loading />;
     }
 
-    if (error) {
+    if (isError) {
       return <ResultsInfo title="An error occurred. 😵" />;
     }
 
-    if (!error && data && data.items.length === 0) {
+    if (data && data.items.length === 0) {
       return <ResultsInfo title="No users found. 😢" />;
     }
 
-    if (!error && data && data.items.length > 0) {
+    if (data && data.items.length > 0) {
       // using map here because there are only 5 items
       return (
         <View style={styles.resultsContainer}>
           <ThemedText>Showing users for "{query}"</ThemedText>
-          {data.items.map((user) => (
+          {data?.items.map((user) => (
             <Accordion key={user.id} title={user.login}>
               <RepositoriesList username={user.login} />
             </Accordion>
@@ -56,15 +56,15 @@ export default function HomeScreen() {
     }
 
     return <ResultsInfo title="Are you looking for someone? 🧐" />;
-  }, [data, error, isLoading]);
+  }, [data, isError, isFetching, query]);
 
   useEffect(() => {
-    if (error) {
+    if (isError) {
       Toast.show(error.message, {
         position: Toast.positions.TOP,
       });
     }
-  }, [error]);
+  }, [error, isError]);
 
   return (
     <ThemedContainer>
@@ -79,7 +79,7 @@ export default function HomeScreen() {
           {({ handleChange, handleSubmit, handleBlur, values, errors }) => (
             <View style={styles.formContainer}>
               <ThemedInput
-                editable={!isLoading}
+                editable={!isFetching}
                 focused={whichFocused === 'username'}
                 value={values.username}
                 error={errors.username}
@@ -91,7 +91,7 @@ export default function HomeScreen() {
                 }}
                 onChangeText={handleChange('username')}
               />
-              <Button title="Search" onPress={() => handleSubmit()} disabled={isLoading} />
+              <Button title="Search" onPress={() => handleSubmit()} disabled={isFetching} />
             </View>
           )}
         </Formik>

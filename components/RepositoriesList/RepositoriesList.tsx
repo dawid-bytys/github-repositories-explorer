@@ -12,16 +12,8 @@ import type { ListRenderItemInfo } from 'react-native';
 import type { RepositoriesListProps } from './types';
 
 export function RepositoriesList({ username }: RepositoriesListProps) {
-  const { data, error, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
+  const { data, error, isPending, isError, isFetchingNextPage, hasNextPage, fetchNextPage } =
     useSearchRepositoriesQuery(username);
-
-  const flattenedData = useMemo(() => {
-    if (!data) {
-      return undefined;
-    }
-
-    return data.pages.flatMap((page) => page);
-  }, [data]);
 
   const renderItem = useCallback(({ item }: ListRenderItemInfo<RepositoriesResponse>) => {
     return (
@@ -53,39 +45,35 @@ export function RepositoriesList({ username }: RepositoriesListProps) {
   }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
 
   useEffect(() => {
-    if (error) {
+    if (isError) {
       Toast.show(error.message, {
         position: Toast.positions.TOP,
       });
     }
-  }, [error]);
+  }, [isError, error]);
 
-  if (isLoading) {
+  if (isPending) {
     return <Loading />;
   }
 
-  if (error) {
+  if (isError) {
     return <ResultsInfo title="An error occurred. 😵" titleStyle={styles.info} />;
   }
 
-  if (!error && flattenedData && flattenedData.length === 0) {
+  if (data.pages[0].length === 0) {
     return <ResultsInfo title="No repositories found. 😢" titleStyle={styles.info} />;
   }
 
-  if (!error && flattenedData && flattenedData.length > 0) {
-    return (
-      <>
-        <FlatList
-          scrollEnabled={false}
-          data={flattenedData}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={styles.listContent}
-        />
-        {renderFooter()}
-      </>
-    );
-  }
-
-  return null;
+  return (
+    <>
+      <FlatList
+        scrollEnabled={false}
+        data={data.pages.flatMap((page) => page)}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={styles.listContent}
+      />
+      {renderFooter()}
+    </>
+  );
 }
