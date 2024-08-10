@@ -85,8 +85,8 @@ export default function HomeScreen() {
                 error={errors.username}
                 placeholder="Enter username"
                 onFocus={() => setWhichFocused('username')}
-                onBlur={() => {
-                  handleBlur('username');
+                onBlur={(e) => {
+                  handleBlur('username')(e);
                   setWhichFocused(null);
                 }}
                 onChangeText={handleChange('username')}
